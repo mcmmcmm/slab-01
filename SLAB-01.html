@@ -329,7 +329,7 @@ function side() {
   </svg>`;
 }
 
-function top() {
+function topView() {
   const ox=48, oy=36, w=400, d=175;
   return `<svg viewBox="0 0 560 300" aria-label="顶视">
     <g transform="translate(${ox} ${oy})">
@@ -399,7 +399,7 @@ function renderInspector() {
 }
 
 function renderCanvas() {
-  const fn = {front, side, top, explode}[view];
+  const fn = {front, side, top: topView, explode}[view];
   document.getElementById("canvas").innerHTML = fn();
   document.getElementById("canvas").querySelectorAll("[data-id]").forEach(n => {
     n.addEventListener("click", e => {
