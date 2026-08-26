@@ -148,327 +148,330 @@
 </section>
 
 <script>
-const PARTS = [
-  {id:"housing", name:"外壳（前框 + 中框）", size:[400,370,175], pos:[0,0,0], raw:"400 × 370 × 175，壁厚 3",
-    mount:"左右对插中框，前框从前扣。亚光黑 ABS / 铝塑。",
-    cable:"内壁左侧 16×16 走线槽，从顶条通到域控。",
-    note:"前脸一块板，底座比上体深，后盖可拆。"},
-  {id:"screen", name:"显示屏", size:[360,240,12], pos:[20,25,2], raw:"360 × 240 × 12（必须朝前）",
-    mount:"前装。四边卡簧 + 2 mm 泡棉，玻璃相对前脸凹 2 mm。",
-    cable:"eDP / LVDS 从屏背正中进域控前面板，长 80 mm，藏在 4 mm 空隙里。",
-    note:"主视觉。屏周留 1.5 mm 灯缝。"},
-  {id:"camBar", name:"顶摄条", size:[400,25,22], pos:[0,0,0], raw:"400 × 25 × 22 独立模组",
-    mount:"从上扣入前框，两颗 M3 沉头。深色玻璃盖板。",
-    cable:"5 路 MIPI 排线从条后出，进左槽。",
-    note:"外观上的传感器带，5 颗镜头外露成一列。"},
-  {id:"domain", name:"座舱域控主机", size:[260,250,115], pos:[20,20,18], raw:"26 × 25 × 11.5 cm → 安装取向 260×250×115（薄边朝后）",
-    mount:"中框 4 颗 M4 减震柱，柱高 4 mm。后脸距后盖 10 mm 风道。",
-    cable:"前方接屏；左侧接摄像头排线；右侧 8 mm 间隙接电源 DC；喇叭 4 路从底边出。",
-    note:"整块贴在屏背后。这是最紧的一刀：115 深贴 12 深的屏。"},
-  {id:"power", name:"电源", size:[90,240,160], pos:[288,22,12], raw:"16 × 9 × 24 cm → 安装取向 90×240×160（立在域控右侧）",
-    mount:"中框右侧托板，4×M4 到电源底脚。进风在下、出风在后。",
-    cable:"AC 从后盖进线孔；DC 短线 8 mm 横跨到域控右面。",
-    note:"不放下巴，避免和喇叭抢位置。立起来刚好与域控同高。"},
-  {id:"spkFL", name:"喇叭 · 下巴左", size:[100,100,50], pos:[24,268,3], raw:"100 × 100 × 50，面朝前",
-    mount:"前框内侧卡槽，面朝参观者。前脸做 7×7 声孔。",
-    cable:"20 cm 到域控底边 AMP-L。",
-    note:"声孔当装饰，和铭牌同一条下巴。"},
-  {id:"spkFR", name:"喇叭 · 下巴右", size:[100,100,50], pos:[276,268,3], raw:"100 × 100 × 50，面朝前",
-    mount:"同左。与右侧电源在 Y 向错开 6 mm，不打架。",
-    cable:"20 cm 到域控底边 AMP-R。",
-    note:"电源在它上头（Y=22–262），喇叭在下巴（Y=268–368）。"},
-  {id:"spkTL", name:"喇叭 · 顶左", size:[100,50,100], pos:[40,0,48], raw:"100 × 100 × 50，面朝上",
-    mount:"顶面开孔，面朝上。盖板与壳体齐平的穿孔板。",
-    cable:"沿顶内壁进左槽。",
-    note:"上发，不占前脸。顶盖穿孔是第二处装饰。"},
-  {id:"spkTR", name:"喇叭 · 顶右", size:[100,50,100], pos:[260,0,48], raw:"100 × 100 × 50，面朝上",
-    mount:"同左。落在电源上方的空腔里。",
-    cable:"沿顶内壁到域控。",
-    note:"电源立柱上方正好有 50 mm 高的顶腔。"},
-  {id:"cams", name:"摄像头 ×12", size:[400,370,175], pos:[0,0,0], raw:"12 颗模组，至少 7 颗外露",
-    mount:"8 颗前脸可见（顶 5 + 左右框 2 + 下巴 1），4 颗藏后盖 / 屏下。",
-    cable:"每路独立排线到域控 CAM1–CAM12，富余 30 mm。",
-    note:"外观重点是顶条那一列，不要做成满屏摄像头。"},
-  {id:"harness", name:"线束仓", size:[16,320,16], pos:[6,22,140], raw:"16 × 16 方槽",
-    mount:"粘在左内壁，带可揭盖。",
-    cable:"摄像头干线 + 喇叭 + 灯带 5V 走这里。交流电不进此槽。",
-    note:"前脸零外露线。AC 只走后盖右侧进电源。"},
-  {id:"light", name:"氛围灯带", size:[364,244,1.5], pos:[18,23,1], raw:"屏周一圈，缝宽 1.5",
-    mount:"嵌在屏与前框之间的灯槽，侧发光。",
-    cable:"5V 从域控 USB / 灯口，沿屏底进左槽。",
-    note:"唯一的发光装饰，冷白，可呼吸。"},
-  {id:"plate", name:"铭牌 / Logo", size:[80,16,1.5], pos:[160,310,0], raw:"80 × 16 × 1.5 金属",
-    mount:"下巴正中，沉 0.5 mm，3M 胶 + 两销。",
-    cable:"无。",
-    note:"客户 logo 放这里。"},
-  {id:"rear", name:"后盖", size:[394,364,3], pos:[3,3,172], raw:"3 mm，8 颗 M3",
-    mount:"四周沉头。开通风栅，栅格与声孔同一几何。",
-    cable:"AC 进线孔在右下；C9 / C10 开在左右上。",
-    note:"维修口：打开后盖就能抽域控和电源。"}
-];
-const MAP = Object.fromEntries(PARTS.map(p => [p.id, p]));
-const CAMS = [
-  {id:"C1", label:"顶 · 左广", vis:1, pos:[56,12,0], look:"朝前偏左"},
-  {id:"C2", label:"顶 · 左", vis:1, pos:[128,12,0], look:"朝前"},
-  {id:"C3", label:"顶 · 中 DMS", vis:1, pos:[200,12,0], look:"朝前对驾驶员位"},
-  {id:"C4", label:"顶 · 右", vis:1, pos:[272,12,0], look:"朝前"},
-  {id:"C5", label:"顶 · 右广", vis:1, pos:[344,12,0], look:"朝前偏右"},
-  {id:"C6", label:"左框", vis:1, pos:[10,145,0], look:"朝前微外"},
-  {id:"C7", label:"右框", vis:1, pos:[390,145,0], look:"朝前微外"},
-  {id:"C8", label:"下巴 OMS", vis:1, pos:[200,318,0], look:"朝前略仰"},
-  {id:"C9", label:"后左环视", vis:0, pos:[24,80,175], look:"朝后"},
-  {id:"C10", label:"后右环视", vis:0, pos:[376,80,175], look:"朝后"},
-  {id:"C11", label:"顶后", vis:0, pos:[200,0,155], look:"朝上略后"},
-  {id:"C12", label:"屏下 IR", vis:0, pos:[200,262,2], look:"朝前，红外"}
-];
-const STEPS = [
-  {id:1, title:"中框 + 电源", part:"power", view:"side", body:"电源立在右侧托板，取向 90×240×160。4×M4。AC 孔预留在后盖右下。"},
-  {id:2, title:"域控", part:"domain", view:"side", body:"域控 260×250×115 贴屏背位置，4 颗减震柱。右侧距电源 8 mm，只过一根 DC 短线。"},
-  {id:3, title:"四只喇叭", part:"spkFL", view:"explode", body:"下巴左右朝前（声孔装饰）。顶面左右朝上（穿孔装饰）。都避开电源和域控的实体。"},
-  {id:4, title:"线束", part:"harness", view:"side", body:"左内壁 16×16 槽：12 路摄像 + 喇叭 + 灯带。交流电不进此槽。前脸一条线都不露。"},
-  {id:5, title:"屏 + 灯缝 + 摄条", part:"screen", view:"front", body:"屏从前装。灯带嵌 1.5 mm 缝。顶条扣上，8 颗镜头在前脸可见。铭牌沉在下巴正中。"},
-  {id:6, title:"后盖", part:"rear", view:"side", body:"8×M3。通风栅与声孔同一几何。C9 / C10 开在后盖。打开就能抽主机和电源。"}
-];
+(function () {
 
-let view = "front";
-let selected = "screen";
+  const PARTS = [
+    {id:"housing", name:"外壳（前框 + 中框）", size:[400,370,175], pos:[0,0,0], raw:"400 × 370 × 175，壁厚 3",
+      mount:"左右对插中框，前框从前扣。亚光黑 ABS / 铝塑。",
+      cable:"内壁左侧 16×16 走线槽，从顶条通到域控。",
+      note:"前脸一块板，底座比上体深，后盖可拆。"},
+    {id:"screen", name:"显示屏", size:[360,240,12], pos:[20,25,2], raw:"360 × 240 × 12（必须朝前）",
+      mount:"前装。四边卡簧 + 2 mm 泡棉，玻璃相对前脸凹 2 mm。",
+      cable:"eDP / LVDS 从屏背正中进域控前面板，长 80 mm，藏在 4 mm 空隙里。",
+      note:"主视觉。屏周留 1.5 mm 灯缝。"},
+    {id:"camBar", name:"顶摄条", size:[400,25,22], pos:[0,0,0], raw:"400 × 25 × 22 独立模组",
+      mount:"从上扣入前框，两颗 M3 沉头。深色玻璃盖板。",
+      cable:"5 路 MIPI 排线从条后出，进左槽。",
+      note:"外观上的传感器带，5 颗镜头外露成一列。"},
+    {id:"domain", name:"座舱域控主机", size:[260,250,115], pos:[20,20,18], raw:"26 × 25 × 11.5 cm → 安装取向 260×250×115（薄边朝后）",
+      mount:"中框 4 颗 M4 减震柱，柱高 4 mm。后脸距后盖 10 mm 风道。",
+      cable:"前方接屏；左侧接摄像头排线；右侧 8 mm 间隙接电源 DC；喇叭 4 路从底边出。",
+      note:"整块贴在屏背后。这是最紧的一刀：115 深贴 12 深的屏。"},
+    {id:"power", name:"电源", size:[90,240,160], pos:[288,22,12], raw:"16 × 9 × 24 cm → 安装取向 90×240×160（立在域控右侧）",
+      mount:"中框右侧托板，4×M4 到电源底脚。进风在下、出风在后。",
+      cable:"AC 从后盖进线孔；DC 短线 8 mm 横跨到域控右面。",
+      note:"不放下巴，避免和喇叭抢位置。立起来刚好与域控同高。"},
+    {id:"spkFL", name:"喇叭 · 下巴左", size:[100,100,50], pos:[24,268,3], raw:"100 × 100 × 50，面朝前",
+      mount:"前框内侧卡槽，面朝参观者。前脸做 7×7 声孔。",
+      cable:"20 cm 到域控底边 AMP-L。",
+      note:"声孔当装饰，和铭牌同一条下巴。"},
+    {id:"spkFR", name:"喇叭 · 下巴右", size:[100,100,50], pos:[276,268,3], raw:"100 × 100 × 50，面朝前",
+      mount:"同左。与右侧电源在 Y 向错开 6 mm，不打架。",
+      cable:"20 cm 到域控底边 AMP-R。",
+      note:"电源在它上头（Y=22–262），喇叭在下巴（Y=268–368）。"},
+    {id:"spkTL", name:"喇叭 · 顶左", size:[100,50,100], pos:[40,0,48], raw:"100 × 100 × 50，面朝上",
+      mount:"顶面开孔，面朝上。盖板与壳体齐平的穿孔板。",
+      cable:"沿顶内壁进左槽。",
+      note:"上发，不占前脸。顶盖穿孔是第二处装饰。"},
+    {id:"spkTR", name:"喇叭 · 顶右", size:[100,50,100], pos:[260,0,48], raw:"100 × 100 × 50，面朝上",
+      mount:"同左。落在电源上方的空腔里。",
+      cable:"沿顶内壁到域控。",
+      note:"电源立柱上方正好有 50 mm 高的顶腔。"},
+    {id:"cams", name:"摄像头 ×12", size:[400,370,175], pos:[0,0,0], raw:"12 颗模组，至少 7 颗外露",
+      mount:"8 颗前脸可见（顶 5 + 左右框 2 + 下巴 1），4 颗藏后盖 / 屏下。",
+      cable:"每路独立排线到域控 CAM1–CAM12，富余 30 mm。",
+      note:"外观重点是顶条那一列，不要做成满屏摄像头。"},
+    {id:"harness", name:"线束仓", size:[16,320,16], pos:[6,22,140], raw:"16 × 16 方槽",
+      mount:"粘在左内壁，带可揭盖。",
+      cable:"摄像头干线 + 喇叭 + 灯带 5V 走这里。交流电不进此槽。",
+      note:"前脸零外露线。AC 只走后盖右侧进电源。"},
+    {id:"light", name:"氛围灯带", size:[364,244,1.5], pos:[18,23,1], raw:"屏周一圈，缝宽 1.5",
+      mount:"嵌在屏与前框之间的灯槽，侧发光。",
+      cable:"5V 从域控 USB / 灯口，沿屏底进左槽。",
+      note:"唯一的发光装饰，冷白，可呼吸。"},
+    {id:"plate", name:"铭牌 / Logo", size:[80,16,1.5], pos:[160,310,0], raw:"80 × 16 × 1.5 金属",
+      mount:"下巴正中，沉 0.5 mm，3M 胶 + 两销。",
+      cable:"无。",
+      note:"客户 logo 放这里。"},
+    {id:"rear", name:"后盖", size:[394,364,3], pos:[3,3,172], raw:"3 mm，8 颗 M3",
+      mount:"四周沉头。开通风栅，栅格与声孔同一几何。",
+      cable:"AC 进线孔在右下；C9 / C10 开在左右上。",
+      note:"维修口：打开后盖就能抽域控和电源。"}
+  ];
+  const MAP = Object.fromEntries(PARTS.map(p => [p.id, p]));
+  const CAMS = [
+    {id:"C1", label:"顶 · 左广", vis:1, pos:[56,12,0], look:"朝前偏左"},
+    {id:"C2", label:"顶 · 左", vis:1, pos:[128,12,0], look:"朝前"},
+    {id:"C3", label:"顶 · 中 DMS", vis:1, pos:[200,12,0], look:"朝前对驾驶员位"},
+    {id:"C4", label:"顶 · 右", vis:1, pos:[272,12,0], look:"朝前"},
+    {id:"C5", label:"顶 · 右广", vis:1, pos:[344,12,0], look:"朝前偏右"},
+    {id:"C6", label:"左框", vis:1, pos:[10,145,0], look:"朝前微外"},
+    {id:"C7", label:"右框", vis:1, pos:[390,145,0], look:"朝前微外"},
+    {id:"C8", label:"下巴 OMS", vis:1, pos:[200,318,0], look:"朝前略仰"},
+    {id:"C9", label:"后左环视", vis:0, pos:[24,80,175], look:"朝后"},
+    {id:"C10", label:"后右环视", vis:0, pos:[376,80,175], look:"朝后"},
+    {id:"C11", label:"顶后", vis:0, pos:[200,0,155], look:"朝上略后"},
+    {id:"C12", label:"屏下 IR", vis:0, pos:[200,262,2], look:"朝前，红外"}
+  ];
+  const STEPS = [
+    {id:1, title:"中框 + 电源", part:"power", view:"side", body:"电源立在右侧托板，取向 90×240×160。4×M4。AC 孔预留在后盖右下。"},
+    {id:2, title:"域控", part:"domain", view:"side", body:"域控 260×250×115 贴屏背位置，4 颗减震柱。右侧距电源 8 mm，只过一根 DC 短线。"},
+    {id:3, title:"四只喇叭", part:"spkFL", view:"explode", body:"下巴左右朝前（声孔装饰）。顶面左右朝上（穿孔装饰）。都避开电源和域控的实体。"},
+    {id:4, title:"线束", part:"harness", view:"side", body:"左内壁 16×16 槽：12 路摄像 + 喇叭 + 灯带。交流电不进此槽。前脸一条线都不露。"},
+    {id:5, title:"屏 + 灯缝 + 摄条", part:"screen", view:"front", body:"屏从前装。灯带嵌 1.5 mm 缝。顶条扣上，8 颗镜头在前脸可见。铭牌沉在下巴正中。"},
+    {id:6, title:"后盖", part:"rear", view:"side", body:"8×M3。通风栅与声孔同一几何。C9 / C10 开在后盖。打开就能抽主机和电源。"}
+  ];
 
-function cls(id) {
-  if (!selected) return "";
-  return selected === id ? "" : "dimmed";
-}
-function hatch(x, y) {
-  let s = "";
-  for (let r = 0; r < 7; r++) for (let c = 0; c < 7; c++)
-    s += `<circle cx="${x+18+c*11}" cy="${y+18+r*11}" r="1.5" fill="#8b8d92"/>`;
-  return s;
-}
-function dimH(x1,x2,y,label) {
-  const mid = (x1+x2)/2;
-  return `<g fill="#8b8d92" stroke="#8b8d92">
-    <line x1="${x1}" y1="${y}" x2="${x2}" y2="${y}" stroke-width=".8"/>
-    <line x1="${x1}" y1="${y-6}" x2="${x1}" y2="${y+6}" stroke-width=".8"/>
-    <line x1="${x2}" y1="${y-6}" x2="${x2}" y2="${y+6}" stroke-width=".8"/>
-    <text x="${mid}" y="${y+14}" text-anchor="middle" font-size="11" stroke="none" font-family="ui-monospace,monospace">${label}</text>
-  </g>`;
-}
-function dimV(x,y1,y2,label) {
-  const mid = (y1+y2)/2;
-  return `<g fill="#8b8d92" stroke="#8b8d92">
-    <line x1="${x}" y1="${y1}" x2="${x}" y2="${y2}" stroke-width=".8"/>
-    <line x1="${x-6}" y1="${y1}" x2="${x+6}" y2="${y1}" stroke-width=".8"/>
-    <line x1="${x-6}" y1="${y2}" x2="${x+6}" y2="${y2}" stroke-width=".8"/>
-    <text x="${x+8}" y="${mid}" font-size="11" stroke="none" font-family="ui-monospace,monospace">${label}</text>
-  </g>`;
-}
+  let view = "front";
+  let selected = "screen";
 
-function front() {
-  const ox=48, oy=20, w=400, h=370;
-  const cams = CAMS.filter(c=>c.vis).map(c => `
-    <g data-id="cams" class="${cls("cams")}">
-      <circle cx="${c.pos[0]}" cy="${c.pos[1]}" r="14" fill="transparent"/>
-      <circle cx="${c.pos[0]}" cy="${c.pos[1]}" r="4.6" fill="#0c0d0f" stroke="#e8d48a" stroke-width="1.4"/>
-      <circle cx="${c.pos[0]}" cy="${c.pos[1]}" r="1.6" fill="#e8d48a"/>
-      <text x="${c.pos[0]}" y="${c.pos[1]-8}" text-anchor="middle" fill="#e8d48a" font-size="8" font-family="ui-monospace,monospace">${c.id}</text>
-    </g>`).join("");
-  return `<svg viewBox="0 0 560 470" aria-label="正面">
-    <g transform="translate(${ox} ${oy})">
-      <rect data-id="housing" width="${w}" height="${h}" rx="10" fill="#1c1d21" stroke="#2a2c31" stroke-width="1.3"/>
-      <rect data-id="camBar" class="${cls("camBar")}" width="${w}" height="25" fill="#0c0d0f" stroke="#e8d48a"/>
-      ${cams}
-      <rect data-id="domain" class="${cls("domain")}" x="20" y="20" width="260" height="250" rx="3" fill="rgba(212,184,150,.25)" stroke="#d4b896" stroke-dasharray="5 3"/>
-      <text x="150" y="148" text-anchor="middle" fill="#d4b896" font-size="12" font-family="ui-monospace,monospace" pointer-events="none">域控 260×250</text>
-      <text x="150" y="164" text-anchor="middle" fill="#d4b896" font-size="9" font-family="ui-monospace,monospace" pointer-events="none">X20 Y20 Z18</text>
-      <rect data-id="power" class="${cls("power")}" x="288" y="22" width="90" height="240" rx="3" fill="rgba(143,191,154,.25)" stroke="#8fbf9a" stroke-dasharray="5 3"/>
-      <text x="333" y="140" text-anchor="middle" fill="#8fbf9a" font-size="11" font-family="ui-monospace,monospace" pointer-events="none">电源 90×240</text>
-      <rect x="20" y="25" width="360" height="240" rx="3" fill="rgba(126,200,212,.10)" stroke="#7ec8d4" stroke-width="1.6" pointer-events="none"/>
-      <rect data-id="screen" class="${cls("screen")}" x="20" y="25" width="360" height="40" fill="transparent"/>
-      <text x="200" y="51" text-anchor="middle" fill="#7ec8d4" font-size="13" pointer-events="none">屏 360 × 240 · 朝前（点此条选屏）</text>
-      <g data-id="spkFL" class="${cls("spkFL")}">
-        <rect x="24" y="268" width="100" height="100" rx="4" fill="#0c0d0f" stroke="#8fa4b8"/>
-        ${hatch(24,268)}
-        <text x="74" y="358" text-anchor="middle" fill="#8fa4b8" font-size="9" font-family="ui-monospace,monospace">喇叭L</text>
-      </g>
-      <g data-id="spkFR" class="${cls("spkFR")}">
-        <rect x="276" y="268" width="100" height="100" rx="4" fill="#0c0d0f" stroke="#8fa4b8"/>
-        ${hatch(276,268)}
-        <text x="326" y="358" text-anchor="middle" fill="#8fa4b8" font-size="9" font-family="ui-monospace,monospace">喇叭R</text>
-      </g>
-      <rect data-id="plate" class="${cls("plate")}" x="160" y="310" width="80" height="16" rx="2" fill="#1c1d21" stroke="#9aa7b2"/>
-      <text x="200" y="321" text-anchor="middle" fill="#ecece8" font-size="8" font-family="ui-monospace,monospace" pointer-events="none">LOGO</text>
-      <rect data-id="harness" class="${cls("harness")}" x="6" y="22" width="10" height="240" fill="rgba(197,206,214,.3)" stroke="#9aa7b2"/>
-    </g>
-    ${dimH(ox, ox+w, oy+h+18, "400")}
-    ${dimH(ox+20, ox+380, oy+h+38, "屏 360")}
-    ${dimV(ox+w+16, oy, oy+h, "370")}
-    ${dimV(ox+w+36, oy+25, oy+265, "屏 240")}
-  </svg>`;
-}
-
-function side() {
-  const ox=64, oy=18, h=370, d=175;
-  return `<svg viewBox="0 0 430 470" aria-label="侧面剖开">
-    <g transform="translate(${ox} ${oy})">
-      <text x="-8" y="148" text-anchor="end" fill="#ecece8" font-size="10">朝前</text>
-      <polygon points="-2,140 -12,148 -2,156" fill="#c5ced6"/>
-      <path data-id="housing" d="M 0 0 H ${d} V ${h} H 0 Z" fill="#1c1d21" stroke="#2a2c31"/>
-      <rect data-id="screen" class="${cls("screen")}" x="2" y="25" width="12" height="240" fill="rgba(126,200,212,.5)" stroke="#7ec8d4"/>
-      <rect data-id="domain" class="${cls("domain")}" x="18" y="20" width="115" height="250" rx="2" fill="rgba(212,184,150,.35)" stroke="#d4b896"/>
-      <text x="75" y="148" text-anchor="middle" fill="#d4b896" font-size="10" font-family="ui-monospace,monospace" pointer-events="none">域控 115 深</text>
-      <rect data-id="power" class="${cls("power")}" x="12" y="22" width="160" height="240" rx="2" fill="rgba(143,191,154,.3)" stroke="#8fbf9a"/>
-      <text x="92" y="146" text-anchor="middle" fill="#8fbf9a" font-size="10" font-family="ui-monospace,monospace" pointer-events="none">电源 160 深</text>
-      <rect data-id="spkFL" class="${cls("spkFL")}" x="3" y="268" width="50" height="100" rx="2" fill="rgba(143,164,184,.4)" stroke="#8fa4b8"/>
-      <rect data-id="spkTL" class="${cls("spkTL")}" x="48" y="0" width="100" height="50" rx="2" fill="rgba(143,164,184,.4)" stroke="#8fa4b8"/>
-      <rect data-id="harness" class="${cls("harness")}" x="140" y="22" width="16" height="240" fill="rgba(197,206,214,.35)" stroke="#9aa7b2" stroke-dasharray="3 3"/>
-      <rect data-id="rear" class="${cls("rear")}" x="172" y="3" width="3" height="364" fill="#8b8d92" stroke="#2a2c31"/>
-      <rect data-id="camBar" class="${cls("camBar")}" x="0" y="0" width="22" height="25" fill="rgba(232,212,138,.4)" stroke="#e8d48a"/>
-    </g>
-    ${dimH(ox, ox+d, oy+h+18, "175 深")}
-    ${dimH(ox+18, ox+133, oy+h+38, "域控 115")}
-    ${dimV(ox+d+14, oy, oy+h, "370")}
-  </svg>`;
-}
-
-function topView() {
-  const ox=48, oy=36, w=400, d=175;
-  return `<svg viewBox="0 0 560 300" aria-label="顶视">
-    <g transform="translate(${ox} ${oy})">
-      <text x="-6" y="10" text-anchor="end" fill="#8b8d92" font-size="9">前</text>
-      <rect data-id="housing" width="${w}" height="${d}" rx="8" fill="#1c1d21" stroke="#2a2c31"/>
-      <rect data-id="screen" class="${cls("screen")}" x="20" y="2" width="360" height="12" fill="rgba(126,200,212,.5)" stroke="#7ec8d4"/>
-      <rect data-id="domain" class="${cls("domain")}" x="20" y="18" width="260" height="115" rx="2" fill="rgba(212,184,150,.3)" stroke="#d4b896"/>
-      <text x="150" y="80" text-anchor="middle" fill="#d4b896" font-size="11" font-family="ui-monospace,monospace" pointer-events="none">域控 260×115</text>
-      <rect data-id="power" class="${cls("power")}" x="288" y="12" width="90" height="160" rx="2" fill="rgba(143,191,154,.3)" stroke="#8fbf9a"/>
-      <text x="333" y="90" text-anchor="middle" fill="#8fbf9a" font-size="10" font-family="ui-monospace,monospace" pointer-events="none">电源 90×160</text>
-      <rect data-id="spkTL" class="${cls("spkTL")}" x="40" y="48" width="100" height="100" rx="2" fill="rgba(143,164,184,.4)" stroke="#8fa4b8"/>
-      <rect data-id="spkTR" class="${cls("spkTR")}" x="260" y="48" width="100" height="100" rx="2" fill="rgba(143,164,184,.4)" stroke="#8fa4b8"/>
-      <rect data-id="harness" class="${cls("harness")}" x="6" y="140" width="16" height="16" fill="#c5ced6" stroke="#9aa7b2"/>
-      ${[56,128,200,272,344].map(x=>`<circle cx="${x}" cy="6" r="3.2" fill="#e8d48a"/>`).join("")}
-    </g>
-    ${dimH(ox, ox+w, oy+d+16, "400")}
-    ${dimV(ox+w+14, oy, oy+d, "175 深")}
-  </svg>`;
-}
-
-function isoBox(x,y,w,h,d,fill,label,id) {
-  const sx=.55, sy=.32;
-  const P=(px,py,pz)=>[x+(px-pz)*sx, y+py*.7+(px+pz)*sy];
-  const f=P(0,0,0), r=P(w,0,0), b=P(w,0,d), l=P(0,0,d);
-  const ft=P(0,h,0), rt=P(w,h,0), bt=P(w,h,d), lt=P(0,h,d);
-  const poly = pts => pts.map(q=>q.join(",")).join(" ");
-  return `<g data-id="${id}" class="${cls(id)}">
-    <polygon points="${poly([l,b,bt,lt])}" fill="${fill}" opacity=".3" stroke="${fill}"/>
-    <polygon points="${poly([r,b,bt,rt])}" fill="${fill}" opacity=".42" stroke="${fill}"/>
-    <polygon points="${poly([ft,rt,bt,lt])}" fill="${fill}" opacity=".58" stroke="${fill}"/>
-    <polygon points="${poly([f,r,rt,ft])}" fill="${fill}" opacity=".22" stroke="${fill}"/>
-    <text x="${(ft[0]+rt[0])/2}" y="${ft[1]-7}" text-anchor="middle" fill="#ecece8" font-size="11">${label}</text>
-  </g>`;
-}
-function explode() {
-  return `<svg viewBox="0 0 640 440" aria-label="拆开">
-    ${isoBox(220,18,190,16,14,"#e8d48a","顶摄条","camBar")}
-    ${isoBox(210,52,210,108,10,"#7ec8d4","屏 360×240","screen")}
-    ${isoBox(54,168,70,54,28,"#8fa4b8","喇叭 下巴L","spkFL")}
-    ${isoBox(470,168,70,54,28,"#8fa4b8","喇叭 下巴R","spkFR")}
-    ${isoBox(80,40,64,28,50,"#8fa4b8","顶L","spkTL")}
-    ${isoBox(470,40,64,28,50,"#8fa4b8","顶R","spkTR")}
-    ${isoBox(190,175,150,118,68,"#d4b896","域控 260×250×115","domain")}
-    ${isoBox(370,168,54,118,86,"#8fbf9a","电源 90×240×160","power")}
-    ${isoBox(530,250,80,120,8,"#8b8d92","后盖","rear")}
-  </svg>`;
-}
-
-function renderInspector() {
-  const el = document.getElementById("inspector");
-  const p = MAP[selected];
-  if (!p) {
-    el.innerHTML = `<p class="kicker mono">零件卡</p><h2>点图上的色块，或左边的名字</h2><p style="color:var(--muted)">会给出这块的安装尺寸、坐标（前脸左上为原点）、怎么固定、线怎么走。</p>`;
-    return;
+  function cls(id) {
+    if (!selected) return "";
+    return selected === id ? "" : "dimmed";
   }
-  el.innerHTML = `<p class="kicker mono">零件卡</p>
-    <h2>${p.name}</h2>
-    <dl>
-      <dt>安装尺寸</dt><dd class="mono">${p.size[0]} × ${p.size[1]} × ${p.size[2]} mm</dd>
-      <dt>原件尺寸</dt><dd>${p.raw}</dd>
-      <dt>坐标 XYZ</dt><dd class="mono">X ${p.pos[0]}　Y ${p.pos[1]}　Z ${p.pos[2]}</dd>
-      <dt>固定</dt><dd>${p.mount}</dd>
-      <dt>走线</dt><dd>${p.cable}</dd>
-      <dt>备注</dt><dd>${p.note}</dd>
-    </dl>
-    <p class="hint">原点：壳体前脸左上外角。X 右 · Y 下 · Z 后（往壳体里）。</p>`;
-}
+  function hatch(x, y) {
+    let s = "";
+    for (let r = 0; r < 7; r++) for (let c = 0; c < 7; c++)
+      s += `<circle cx="${x+18+c*11}" cy="${y+18+r*11}" r="1.5" fill="#8b8d92"/>`;
+    return s;
+  }
+  function dimH(x1,x2,y,label) {
+    const mid = (x1+x2)/2;
+    return `<g fill="#8b8d92" stroke="#8b8d92">
+      <line x1="${x1}" y1="${y}" x2="${x2}" y2="${y}" stroke-width=".8"/>
+      <line x1="${x1}" y1="${y-6}" x2="${x1}" y2="${y+6}" stroke-width=".8"/>
+      <line x1="${x2}" y1="${y-6}" x2="${x2}" y2="${y+6}" stroke-width=".8"/>
+      <text x="${mid}" y="${y+14}" text-anchor="middle" font-size="11" stroke="none" font-family="ui-monospace,monospace">${label}</text>
+    </g>`;
+  }
+  function dimV(x,y1,y2,label) {
+    const mid = (y1+y2)/2;
+    return `<g fill="#8b8d92" stroke="#8b8d92">
+      <line x1="${x}" y1="${y1}" x2="${x}" y2="${y2}" stroke-width=".8"/>
+      <line x1="${x-6}" y1="${y1}" x2="${x+6}" y2="${y1}" stroke-width=".8"/>
+      <line x1="${x-6}" y1="${y2}" x2="${x+6}" y2="${y2}" stroke-width=".8"/>
+      <text x="${x+8}" y="${mid}" font-size="11" stroke="none" font-family="ui-monospace,monospace">${label}</text>
+    </g>`;
+  }
 
-function renderCanvas() {
-  const fn = {front, side, top: topView, explode}[view];
-  document.getElementById("canvas").innerHTML = fn();
-  document.getElementById("canvas").querySelectorAll("[data-id]").forEach(n => {
-    n.addEventListener("click", e => {
-      e.stopPropagation();
-      pick(n.getAttribute("data-id"));
+  function front() {
+    const ox=48, oy=20, w=400, h=370;
+    const cams = CAMS.filter(c=>c.vis).map(c => `
+      <g data-id="cams" class="${cls("cams")}">
+        <circle cx="${c.pos[0]}" cy="${c.pos[1]}" r="14" fill="transparent"/>
+        <circle cx="${c.pos[0]}" cy="${c.pos[1]}" r="4.6" fill="#0c0d0f" stroke="#e8d48a" stroke-width="1.4"/>
+        <circle cx="${c.pos[0]}" cy="${c.pos[1]}" r="1.6" fill="#e8d48a"/>
+        <text x="${c.pos[0]}" y="${c.pos[1]-8}" text-anchor="middle" fill="#e8d48a" font-size="8" font-family="ui-monospace,monospace">${c.id}</text>
+      </g>`).join("");
+    return `<svg viewBox="0 0 560 470" aria-label="正面">
+      <g transform="translate(${ox} ${oy})">
+        <rect data-id="housing" width="${w}" height="${h}" rx="10" fill="#1c1d21" stroke="#2a2c31" stroke-width="1.3"/>
+        <rect data-id="camBar" class="${cls("camBar")}" width="${w}" height="25" fill="#0c0d0f" stroke="#e8d48a"/>
+        ${cams}
+        <rect data-id="domain" class="${cls("domain")}" x="20" y="20" width="260" height="250" rx="3" fill="rgba(212,184,150,.25)" stroke="#d4b896" stroke-dasharray="5 3"/>
+        <text x="150" y="148" text-anchor="middle" fill="#d4b896" font-size="12" font-family="ui-monospace,monospace" pointer-events="none">域控 260×250</text>
+        <text x="150" y="164" text-anchor="middle" fill="#d4b896" font-size="9" font-family="ui-monospace,monospace" pointer-events="none">X20 Y20 Z18</text>
+        <rect data-id="power" class="${cls("power")}" x="288" y="22" width="90" height="240" rx="3" fill="rgba(143,191,154,.25)" stroke="#8fbf9a" stroke-dasharray="5 3"/>
+        <text x="333" y="140" text-anchor="middle" fill="#8fbf9a" font-size="11" font-family="ui-monospace,monospace" pointer-events="none">电源 90×240</text>
+        <rect x="20" y="25" width="360" height="240" rx="3" fill="rgba(126,200,212,.10)" stroke="#7ec8d4" stroke-width="1.6" pointer-events="none"/>
+        <rect data-id="screen" class="${cls("screen")}" x="20" y="25" width="360" height="40" fill="transparent"/>
+        <text x="200" y="51" text-anchor="middle" fill="#7ec8d4" font-size="13" pointer-events="none">屏 360 × 240 · 朝前（点此条选屏）</text>
+        <g data-id="spkFL" class="${cls("spkFL")}">
+          <rect x="24" y="268" width="100" height="100" rx="4" fill="#0c0d0f" stroke="#8fa4b8"/>
+          ${hatch(24,268)}
+          <text x="74" y="358" text-anchor="middle" fill="#8fa4b8" font-size="9" font-family="ui-monospace,monospace">喇叭L</text>
+        </g>
+        <g data-id="spkFR" class="${cls("spkFR")}">
+          <rect x="276" y="268" width="100" height="100" rx="4" fill="#0c0d0f" stroke="#8fa4b8"/>
+          ${hatch(276,268)}
+          <text x="326" y="358" text-anchor="middle" fill="#8fa4b8" font-size="9" font-family="ui-monospace,monospace">喇叭R</text>
+        </g>
+        <rect data-id="plate" class="${cls("plate")}" x="160" y="310" width="80" height="16" rx="2" fill="#1c1d21" stroke="#9aa7b2"/>
+        <text x="200" y="321" text-anchor="middle" fill="#ecece8" font-size="8" font-family="ui-monospace,monospace" pointer-events="none">LOGO</text>
+        <rect data-id="harness" class="${cls("harness")}" x="6" y="22" width="10" height="240" fill="rgba(197,206,214,.3)" stroke="#9aa7b2"/>
+      </g>
+      ${dimH(ox, ox+w, oy+h+18, "400")}
+      ${dimH(ox+20, ox+380, oy+h+38, "屏 360")}
+      ${dimV(ox+w+16, oy, oy+h, "370")}
+      ${dimV(ox+w+36, oy+25, oy+265, "屏 240")}
+    </svg>`;
+  }
+
+  function side() {
+    const ox=64, oy=18, h=370, d=175;
+    return `<svg viewBox="0 0 430 470" aria-label="侧面剖开">
+      <g transform="translate(${ox} ${oy})">
+        <text x="-8" y="148" text-anchor="end" fill="#ecece8" font-size="10">朝前</text>
+        <polygon points="-2,140 -12,148 -2,156" fill="#c5ced6"/>
+        <path data-id="housing" d="M 0 0 H ${d} V ${h} H 0 Z" fill="#1c1d21" stroke="#2a2c31"/>
+        <rect data-id="screen" class="${cls("screen")}" x="2" y="25" width="12" height="240" fill="rgba(126,200,212,.5)" stroke="#7ec8d4"/>
+        <rect data-id="domain" class="${cls("domain")}" x="18" y="20" width="115" height="250" rx="2" fill="rgba(212,184,150,.35)" stroke="#d4b896"/>
+        <text x="75" y="148" text-anchor="middle" fill="#d4b896" font-size="10" font-family="ui-monospace,monospace" pointer-events="none">域控 115 深</text>
+        <rect data-id="power" class="${cls("power")}" x="12" y="22" width="160" height="240" rx="2" fill="rgba(143,191,154,.3)" stroke="#8fbf9a"/>
+        <text x="92" y="146" text-anchor="middle" fill="#8fbf9a" font-size="10" font-family="ui-monospace,monospace" pointer-events="none">电源 160 深</text>
+        <rect data-id="spkFL" class="${cls("spkFL")}" x="3" y="268" width="50" height="100" rx="2" fill="rgba(143,164,184,.4)" stroke="#8fa4b8"/>
+        <rect data-id="spkTL" class="${cls("spkTL")}" x="48" y="0" width="100" height="50" rx="2" fill="rgba(143,164,184,.4)" stroke="#8fa4b8"/>
+        <rect data-id="harness" class="${cls("harness")}" x="140" y="22" width="16" height="240" fill="rgba(197,206,214,.35)" stroke="#9aa7b2" stroke-dasharray="3 3"/>
+        <rect data-id="rear" class="${cls("rear")}" x="172" y="3" width="3" height="364" fill="#8b8d92" stroke="#2a2c31"/>
+        <rect data-id="camBar" class="${cls("camBar")}" x="0" y="0" width="22" height="25" fill="rgba(232,212,138,.4)" stroke="#e8d48a"/>
+      </g>
+      ${dimH(ox, ox+d, oy+h+18, "175 深")}
+      ${dimH(ox+18, ox+133, oy+h+38, "域控 115")}
+      ${dimV(ox+d+14, oy, oy+h, "370")}
+    </svg>`;
+  }
+
+  function topView() {
+    const ox=48, oy=36, w=400, d=175;
+    return `<svg viewBox="0 0 560 300" aria-label="顶视">
+      <g transform="translate(${ox} ${oy})">
+        <text x="-6" y="10" text-anchor="end" fill="#8b8d92" font-size="9">前</text>
+        <rect data-id="housing" width="${w}" height="${d}" rx="8" fill="#1c1d21" stroke="#2a2c31"/>
+        <rect data-id="screen" class="${cls("screen")}" x="20" y="2" width="360" height="12" fill="rgba(126,200,212,.5)" stroke="#7ec8d4"/>
+        <rect data-id="domain" class="${cls("domain")}" x="20" y="18" width="260" height="115" rx="2" fill="rgba(212,184,150,.3)" stroke="#d4b896"/>
+        <text x="150" y="80" text-anchor="middle" fill="#d4b896" font-size="11" font-family="ui-monospace,monospace" pointer-events="none">域控 260×115</text>
+        <rect data-id="power" class="${cls("power")}" x="288" y="12" width="90" height="160" rx="2" fill="rgba(143,191,154,.3)" stroke="#8fbf9a"/>
+        <text x="333" y="90" text-anchor="middle" fill="#8fbf9a" font-size="10" font-family="ui-monospace,monospace" pointer-events="none">电源 90×160</text>
+        <rect data-id="spkTL" class="${cls("spkTL")}" x="40" y="48" width="100" height="100" rx="2" fill="rgba(143,164,184,.4)" stroke="#8fa4b8"/>
+        <rect data-id="spkTR" class="${cls("spkTR")}" x="260" y="48" width="100" height="100" rx="2" fill="rgba(143,164,184,.4)" stroke="#8fa4b8"/>
+        <rect data-id="harness" class="${cls("harness")}" x="6" y="140" width="16" height="16" fill="#c5ced6" stroke="#9aa7b2"/>
+        ${[56,128,200,272,344].map(x=>`<circle cx="${x}" cy="6" r="3.2" fill="#e8d48a"/>`).join("")}
+      </g>
+      ${dimH(ox, ox+w, oy+d+16, "400")}
+      ${dimV(ox+w+14, oy, oy+d, "175 深")}
+    </svg>`;
+  }
+
+  function isoBox(x,y,w,h,d,fill,label,id) {
+    const sx=.55, sy=.32;
+    const P=(px,py,pz)=>[x+(px-pz)*sx, y+py*.7+(px+pz)*sy];
+    const f=P(0,0,0), r=P(w,0,0), b=P(w,0,d), l=P(0,0,d);
+    const ft=P(0,h,0), rt=P(w,h,0), bt=P(w,h,d), lt=P(0,h,d);
+    const poly = pts => pts.map(q=>q.join(",")).join(" ");
+    return `<g data-id="${id}" class="${cls(id)}">
+      <polygon points="${poly([l,b,bt,lt])}" fill="${fill}" opacity=".3" stroke="${fill}"/>
+      <polygon points="${poly([r,b,bt,rt])}" fill="${fill}" opacity=".42" stroke="${fill}"/>
+      <polygon points="${poly([ft,rt,bt,lt])}" fill="${fill}" opacity=".58" stroke="${fill}"/>
+      <polygon points="${poly([f,r,rt,ft])}" fill="${fill}" opacity=".22" stroke="${fill}"/>
+      <text x="${(ft[0]+rt[0])/2}" y="${ft[1]-7}" text-anchor="middle" fill="#ecece8" font-size="11">${label}</text>
+    </g>`;
+  }
+  function explode() {
+    return `<svg viewBox="0 0 640 440" aria-label="拆开">
+      ${isoBox(220,18,190,16,14,"#e8d48a","顶摄条","camBar")}
+      ${isoBox(210,52,210,108,10,"#7ec8d4","屏 360×240","screen")}
+      ${isoBox(54,168,70,54,28,"#8fa4b8","喇叭 下巴L","spkFL")}
+      ${isoBox(470,168,70,54,28,"#8fa4b8","喇叭 下巴R","spkFR")}
+      ${isoBox(80,40,64,28,50,"#8fa4b8","顶L","spkTL")}
+      ${isoBox(470,40,64,28,50,"#8fa4b8","顶R","spkTR")}
+      ${isoBox(190,175,150,118,68,"#d4b896","域控 260×250×115","domain")}
+      ${isoBox(370,168,54,118,86,"#8fbf9a","电源 90×240×160","power")}
+      ${isoBox(530,250,80,120,8,"#8b8d92","后盖","rear")}
+    </svg>`;
+  }
+
+  function renderInspector() {
+    const el = document.getElementById("inspector");
+    const p = MAP[selected];
+    if (!p) {
+      el.innerHTML = `<p class="kicker mono">零件卡</p><h2>点图上的色块，或左边的名字</h2><p style="color:var(--muted)">会给出这块的安装尺寸、坐标（前脸左上为原点）、怎么固定、线怎么走。</p>`;
+      return;
+    }
+    el.innerHTML = `<p class="kicker mono">零件卡</p>
+      <h2>${p.name}</h2>
+      <dl>
+        <dt>安装尺寸</dt><dd class="mono">${p.size[0]} × ${p.size[1]} × ${p.size[2]} mm</dd>
+        <dt>原件尺寸</dt><dd>${p.raw}</dd>
+        <dt>坐标 XYZ</dt><dd class="mono">X ${p.pos[0]}　Y ${p.pos[1]}　Z ${p.pos[2]}</dd>
+        <dt>固定</dt><dd>${p.mount}</dd>
+        <dt>走线</dt><dd>${p.cable}</dd>
+        <dt>备注</dt><dd>${p.note}</dd>
+      </dl>
+      <p class="hint">原点：壳体前脸左上外角。X 右 · Y 下 · Z 后（往壳体里）。</p>`;
+  }
+
+  function renderCanvas() {
+    const fn = {front, side, top: topView, explode}[view];
+    document.getElementById("canvas").innerHTML = fn();
+    document.getElementById("canvas").querySelectorAll("[data-id]").forEach(n => {
+      n.addEventListener("click", e => {
+        e.stopPropagation();
+        pick(n.getAttribute("data-id"));
+      });
     });
+  }
+
+  function pick(id) {
+    selected = selected === id ? null : id;
+    draw();
+  }
+
+  function draw() {
+    document.querySelectorAll("#tabs button").forEach(b => b.classList.toggle("on", b.dataset.view === view));
+    document.querySelectorAll(".part-btn").forEach(b => b.classList.toggle("on", b.dataset.id === selected));
+    renderCanvas();
+    renderInspector();
+  }
+
+  document.getElementById("tabs").innerHTML = [
+    ["front","正面"],["side","侧面剖开"],["top","顶视"],["explode","拆开"]
+  ].map(([id,label]) => `<button data-view="${id}">${label}</button>`).join("");
+  document.getElementById("tabs").addEventListener("click", e => {
+    const b = e.target.closest("button");
+    if (!b) return;
+    view = b.dataset.view;
+    draw();
   });
-}
 
-function pick(id) {
-  selected = selected === id ? null : id;
+  document.getElementById("parts").innerHTML = PARTS.map(p =>
+    `<button class="part-btn" data-id="${p.id}"><span>${p.name}</span><span>${p.size[0]}×${p.size[1]}×${p.size[2]}</span></button>`
+  ).join("");
+  document.getElementById("parts").addEventListener("click", e => {
+    const b = e.target.closest("[data-id]");
+    if (b) pick(b.dataset.id);
+  });
+
+  document.getElementById("steps").innerHTML = STEPS.map(s =>
+    `<button class="step" data-part="${s.part}" data-view="${s.view}">
+      <div class="t mono">${String(s.id).padStart(2,"0")} ${s.title}</div>
+      <p>${s.body}</p>
+    </button>`
+  ).join("");
+  document.getElementById("steps").addEventListener("click", e => {
+    const b = e.target.closest(".step");
+    if (!b) return;
+    view = b.dataset.view;
+    selected = b.dataset.part;
+    draw();
+  });
+
+  document.getElementById("cams").innerHTML = CAMS.map(c =>
+    `<button class="cam" data-z="${c.pos[2]}">
+      <div class="id mono">${c.id} · ${c.vis ? "外露" : "内藏"}</div>
+      <div>${c.label}</div>
+      <div class="xyz mono">X${c.pos[0]} Y${c.pos[1]} Z${c.pos[2]} · ${c.look}</div>
+    </button>`
+  ).join("");
+  document.getElementById("cams").addEventListener("click", e => {
+    const b = e.target.closest(".cam");
+    if (!b) return;
+    selected = "cams";
+    view = Number(b.dataset.z) > 100 ? "side" : "front";
+    draw();
+  });
+
   draw();
-}
-
-function draw() {
-  document.querySelectorAll("#tabs button").forEach(b => b.classList.toggle("on", b.dataset.view === view));
-  document.querySelectorAll(".part-btn").forEach(b => b.classList.toggle("on", b.dataset.id === selected));
-  renderCanvas();
-  renderInspector();
-}
-
-document.getElementById("tabs").innerHTML = [
-  ["front","正面"],["side","侧面剖开"],["top","顶视"],["explode","拆开"]
-].map(([id,label]) => `<button data-view="${id}">${label}</button>`).join("");
-document.getElementById("tabs").addEventListener("click", e => {
-  const b = e.target.closest("button");
-  if (!b) return;
-  view = b.dataset.view;
-  draw();
-});
-
-document.getElementById("parts").innerHTML = PARTS.map(p =>
-  `<button class="part-btn" data-id="${p.id}"><span>${p.name}</span><span>${p.size[0]}×${p.size[1]}×${p.size[2]}</span></button>`
-).join("");
-document.getElementById("parts").addEventListener("click", e => {
-  const b = e.target.closest("[data-id]");
-  if (b) pick(b.dataset.id);
-});
-
-document.getElementById("steps").innerHTML = STEPS.map(s =>
-  `<button class="step" data-part="${s.part}" data-view="${s.view}">
-    <div class="t mono">${String(s.id).padStart(2,"0")} ${s.title}</div>
-    <p>${s.body}</p>
-  </button>`
-).join("");
-document.getElementById("steps").addEventListener("click", e => {
-  const b = e.target.closest(".step");
-  if (!b) return;
-  view = b.dataset.view;
-  selected = b.dataset.part;
-  draw();
-});
-
-document.getElementById("cams").innerHTML = CAMS.map(c =>
-  `<button class="cam" data-z="${c.pos[2]}">
-    <div class="id mono">${c.id} · ${c.vis ? "外露" : "内藏"}</div>
-    <div>${c.label}</div>
-    <div class="xyz mono">X${c.pos[0]} Y${c.pos[1]} Z${c.pos[2]} · ${c.look}</div>
-  </button>`
-).join("");
-document.getElementById("cams").addEventListener("click", e => {
-  const b = e.target.closest(".cam");
-  if (!b) return;
-  selected = "cams";
-  view = Number(b.dataset.z) > 100 ? "side" : "front";
-  draw();
-});
-
-draw();
+})();
 </script>
 </body>
 </html>
